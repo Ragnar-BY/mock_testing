@@ -6,6 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var wrongkey = "WRONGKEY"
+
 func TestDBProviderMockery_ReadValue(t *testing.T) {
 	db := &MockDatabase{}
 	tt := []struct {

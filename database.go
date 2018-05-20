@@ -3,6 +3,7 @@ package main
 import "errors"
 
 //go:generate mockery -name=Database -inpkg
+
 // ErrWrongKey is error for wrong key.
 var ErrWrongKey = errors.New("wrong key")
 
