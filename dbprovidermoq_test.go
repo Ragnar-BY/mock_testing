@@ -4,7 +4,8 @@ import (
 	"testing"
 )
 
-// Tests use mock from github.com/matryer/moq
+var wrongkey = "WRONGKEY"
+
 func TestDBProviderMoq_ReadValue(t *testing.T) {
 	db := &DatabaseMock{ReadFunc: func(key string) (string, error) {
 		if key == wrongkey {
