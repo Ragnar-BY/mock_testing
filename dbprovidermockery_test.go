@@ -10,6 +10,7 @@ var wrongkey = "WRONGKEY"
 
 func TestDBProviderMockery_ReadValue(t *testing.T) {
 	db := &MockDatabase{}
+	dp := DBProvider{db}
 	tt := []struct {
 		name     string
 		key      string
@@ -31,7 +32,6 @@ func TestDBProviderMockery_ReadValue(t *testing.T) {
 	}
 	for _, tc := range tt {
 		db.On("Read", tc.key).Return(tc.expected, tc.err)
-		dp := DBProvider{db}
 		val, err := dp.ReadValue(tc.key)
 		assert.Equal(t, tc.expected, val)
 		assert.Equal(t, tc.err, err)
@@ -41,6 +41,7 @@ func TestDBProviderMockery_ReadValue(t *testing.T) {
 
 func TestDBProviderMockery_AddValue(t *testing.T) {
 	db := &MockDatabase{}
+	dp := DBProvider{db}
 	tt := []struct {
 		name string
 		key  string
@@ -59,7 +60,6 @@ func TestDBProviderMockery_AddValue(t *testing.T) {
 	}
 	for _, tc := range tt {
 		db.On("Write", tc.key, "val").Return(tc.err)
-		dp := DBProvider{db}
 		err := dp.AddValue(tc.key, "val")
 		assert.Equal(t, tc.err, err)
 		db.AssertExpectations(t)
