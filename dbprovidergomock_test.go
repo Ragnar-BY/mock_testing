@@ -2,27 +2,17 @@ package main
 
 import (
 	"testing"
-)
 
-// We create own mock implementation of DB.
-type dbmock struct{}
+	"github.com/golang/mock/gomock"
+)
 
 var wrongkey = "WRONGKEY"
 
-func (db *dbmock) Read(key string) (string, error) {
-	if key == wrongkey {
-		return "", ErrWrongKey
-	}
-	return "value", nil
-}
-func (db *dbmock) Write(key string, value string) error {
-	if key == wrongkey {
-		return ErrWrongKey
-	}
-	return nil
-}
-func TestDBProvider_ReadValue(t *testing.T) {
-	db := &dbmock{}
+func TestDBProviderGomock_ReadValue(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	db := NewMockDatabase(ctrl)
 	dp := DBProvider{db}
 
 	tt := []struct {
@@ -46,6 +36,7 @@ func TestDBProvider_ReadValue(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		db.EXPECT().Read(tc.key).Return(tc.expected, tc.err)
 		val, err := dp.ReadValue(tc.key)
 		if err != tc.err {
 			t.Errorf("[%s] expected %v, received %v", tc.name, tc.err, err)
@@ -53,11 +44,15 @@ func TestDBProvider_ReadValue(t *testing.T) {
 		if val != tc.expected {
 			t.Errorf("[%s] expected %v, received %v", tc.name, tc.expected, val)
 		}
+
 	}
 }
 
-func TestDBProvider_AddValue(t *testing.T) {
-	db := &dbmock{}
+func TestDBProviderGomock_AddValue(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	db := NewMockDatabase(ctrl)
 	dp := DBProvider{db}
 
 	tt := []struct {
@@ -78,6 +73,7 @@ func TestDBProvider_AddValue(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		db.EXPECT().Write(tc.key, "val").Return(tc.err)
 		err := dp.AddValue(tc.key, "val")
 		if err != tc.err {
 			t.Errorf("[%s] expected %v, received %v", tc.name, tc.err, err)

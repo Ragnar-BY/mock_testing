@@ -2,6 +2,8 @@ package main
 
 import "errors"
 
+//go:generate mockgen -source=./database.go -destination=./mock_database.go -package=main
+
 // ErrWrongKey is error for wrong key.
 var ErrWrongKey = errors.New("wrong key")
 
