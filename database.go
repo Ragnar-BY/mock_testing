@@ -2,6 +2,8 @@ package main
 
 import "errors"
 
+//go:generate pegomock generate Database
+
 // ErrWrongKey is error for wrong key.
 var ErrWrongKey = errors.New("wrong key")
 
