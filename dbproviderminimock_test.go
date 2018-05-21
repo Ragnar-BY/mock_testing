@@ -2,27 +2,17 @@ package main
 
 import (
 	"testing"
-)
 
-// We create own mock implementation of DB.
-type dbmock struct{}
+	"github.com/gojuno/minimock"
+)
 
 var wrongkey = "WRONGKEY"
 
-func (db *dbmock) Read(key string) (string, error) {
-	if key == wrongkey {
-		return "", ErrWrongKey
-	}
-	return "value", nil
-}
-func (db *dbmock) Write(key string, value string) error {
-	if key == wrongkey {
-		return ErrWrongKey
-	}
-	return nil
-}
-func TestDBProvider_ReadValue(t *testing.T) {
-	db := &dbmock{}
+func TestDBProviderMinimock_ReadValue(t *testing.T) {
+	mc := minimock.NewController(t)
+	defer mc.Finish()
+
+	db := NewDatabaseMock(mc)
 	dp := DBProvider{db}
 
 	tt := []struct {
@@ -46,6 +36,8 @@ func TestDBProvider_ReadValue(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		db.ReadMock.Expect(tc.key).Return(tc.expected, tc.err)
+
 		val, err := dp.ReadValue(tc.key)
 		if err != tc.err {
 			t.Errorf("[%s] expected %v, received %v", tc.name, tc.err, err)
@@ -56,8 +48,11 @@ func TestDBProvider_ReadValue(t *testing.T) {
 	}
 }
 
-func TestDBProvider_AddValue(t *testing.T) {
-	db := &dbmock{}
+func TestDBProviderMinimock_AddValue(t *testing.T) {
+	mc := minimock.NewController(t)
+	defer mc.Finish()
+
+	db := NewDatabaseMock(mc)
 	dp := DBProvider{db}
 
 	tt := []struct {
@@ -78,6 +73,7 @@ func TestDBProvider_AddValue(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		db.WriteMock.Expect(tc.key, "val").Return(tc.err)
 		err := dp.AddValue(tc.key, "val")
 		if err != tc.err {
 			t.Errorf("[%s] expected %v, received %v", tc.name, tc.err, err)

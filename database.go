@@ -2,6 +2,8 @@ package main
 
 import "errors"
 
+//go:generate minimock -i github.com/Ragnar-BY/mock_testing.Database -o ./
+
 // ErrWrongKey is error for wrong key.
 var ErrWrongKey = errors.New("wrong key")
 
