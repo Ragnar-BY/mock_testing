@@ -2,24 +2,25 @@ package main
 
 import (
 	"testing"
-)
 
-// We create own mock implementation of DB.
-type dbmock struct{}
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+)
 
 var wrongkey = "WRONGKEY"
 
+type dbmock struct {
+	mock.Mock
+}
+
 func (db *dbmock) Read(key string) (string, error) {
-	if key == wrongkey {
-		return "", ErrWrongKey
-	}
-	return "value", nil
+	args := db.Called(key)
+	return args.String(0), args.Error(1)
 }
 func (db *dbmock) Write(key string, value string) error {
-	if key == wrongkey {
-		return ErrWrongKey
-	}
-	return nil
+	args := db.Called(key, value)
+	return args.Error(0)
+
 }
 func TestDBProvider_ReadValue(t *testing.T) {
 	db := &dbmock{}
@@ -46,13 +47,11 @@ func TestDBProvider_ReadValue(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		db.On("Read", tc.key).Return(tc.expected, tc.err)
 		val, err := dp.ReadValue(tc.key)
-		if err != tc.err {
-			t.Errorf("[%s] expected %v, received %v", tc.name, tc.err, err)
-		}
-		if val != tc.expected {
-			t.Errorf("[%s] expected %v, received %v", tc.name, tc.expected, val)
-		}
+		assert.Equal(t, tc.expected, val)
+		assert.Equal(t, tc.err, err)
+		db.AssertExpectations(t)
 	}
 }
 
@@ -78,9 +77,9 @@ func TestDBProvider_AddValue(t *testing.T) {
 	}
 
 	for _, tc := range tt {
+		db.On("Write", tc.key, "val").Return(tc.err)
 		err := dp.AddValue(tc.key, "val")
-		if err != tc.err {
-			t.Errorf("[%s] expected %v, received %v", tc.name, tc.err, err)
-		}
+		assert.Equal(t, tc.err, err)
+		db.AssertExpectations(t)
 	}
 }
