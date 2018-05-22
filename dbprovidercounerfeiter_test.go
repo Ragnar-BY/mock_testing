@@ -11,33 +11,33 @@ func TestDBProviderCounterFeiter_ReadValue(t *testing.T) {
 	dp := DBProvider{db}
 
 	tt := []struct {
-		name     string
-		key      string
-		expected string
-		err      error
+		name          string
+		key           string
+		expectedValue string
+		expectedError error
 	}{
 		{
-			name:     "right key",
-			key:      "rightkey",
-			expected: "value",
-			err:      nil,
+			name:          "right key",
+			key:           "rightkey",
+			expectedValue: "value",
+			expectedError: nil,
 		},
 		{
-			name:     "wrong key",
-			key:      wrongkey,
-			expected: "",
-			err:      ErrWrongKey,
+			name:          "wrong key",
+			key:           wrongkey,
+			expectedValue: "",
+			expectedError: ErrWrongKey,
 		},
 	}
 
 	for _, tc := range tt {
-		db.ReadReturns(tc.expected, tc.err)
+		db.ReadReturns(tc.expectedValue, tc.expectedError)
 		val, err := dp.ReadValue(tc.key)
-		if err != tc.err {
-			t.Errorf("[%s] expected %v, received %v", tc.name, tc.err, err)
+		if err != tc.expectedError {
+			t.Errorf("[%s] expected %v, received %v", tc.name, tc.expectedError, err)
 		}
-		if val != tc.expected {
-			t.Errorf("[%s] expected %v, received %v", tc.name, tc.expected, val)
+		if val != tc.expectedValue {
+			t.Errorf("[%s] expected %v, received %v", tc.name, tc.expectedValue, val)
 		}
 	}
 }
@@ -47,27 +47,27 @@ func TestDBProviderCounterFeiter_AddValue(t *testing.T) {
 	dp := DBProvider{db}
 
 	tt := []struct {
-		name string
-		key  string
-		err  error
+		name          string
+		key           string
+		expectedError error
 	}{
 		{
-			name: "right key",
-			key:  "rightkey",
-			err:  nil,
+			name:          "right key",
+			key:           "rightkey",
+			expectedError: nil,
 		},
 		{
-			name: "wrong key",
-			key:  wrongkey,
-			err:  ErrWrongKey,
+			name:          "wrong key",
+			key:           wrongkey,
+			expectedError: ErrWrongKey,
 		},
 	}
 
 	for _, tc := range tt {
-		db.WriteReturns(tc.err)
+		db.WriteReturns(tc.expectedError)
 		err := dp.AddValue(tc.key, "val")
-		if err != tc.err {
-			t.Errorf("[%s] expected %v, received %v", tc.name, tc.err, err)
+		if err != tc.expectedError {
+			t.Errorf("[%s] expected %v, received %v", tc.name, tc.expectedError, err)
 		}
 	}
 }
